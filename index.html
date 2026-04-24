@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D 动态沉浸式塔罗牌占卜</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="scene-container" aria-label="Three.js 3D 场景"></div>
+
+  <div id="vignette"></div>
+
+  <header class="hud-title">
+    <h1>沉浸式 3D 塔罗占卜</h1>
+    <p>Past · Present · Future</p>
+  </header>
+
+  <div class="top-actions" aria-label="占卜操作">
+    <button id="history-btn" class="ghost-btn" type="button">占卜记录</button>
+    <button id="reset-btn" class="ghost-btn" type="button">重新占卜</button>
+  </div>
+
+  <section id="question-panel" class="glass-panel active" aria-live="polite">
+    <h2>第一步：提出你的问题</h2>
+    <p class="panel-tip">请专注于此刻最想得到指引的主题，输入后开始占卜。</p>
+    <div class="question-row">
+      <input id="question-input" type="text" maxlength="120" placeholder="例如：我接下来三个月的事业发展如何？" />
+      <button id="start-btn">开始占卜</button>
+    </div>
+  </section>
+
+  <section id="draw-panel" class="glass-panel" aria-live="polite">
+    <h2>第二步：抽取三张牌</h2>
+    <p id="draw-tip">请从牌阵中依次选择 3 张牌，代表过去、现在、未来。</p>
+    <div class="picked-slots">
+      <span id="slot-past">过去：待抽取</span>
+      <span id="slot-present">现在：待抽取</span>
+      <span id="slot-future">未来：待抽取</span>
+    </div>
+  </section>
+
+  <aside id="reading-panel" class="glass-panel" aria-live="polite">
+    <h2>第三步：AI 塔罗解读</h2>
+    <div id="reading-media" class="reading-media" aria-label="三张牌正面预览"></div>
+    <div id="reading-content">等待你抽取三张牌后，这里将出现你的专属解读...</div>
+  </aside>
+
+  <aside id="history-panel" class="glass-panel history-panel" aria-live="polite">
+    <div class="history-header">
+      <h2>占卜记录</h2>
+      <button id="history-close-btn" class="ghost-btn small" type="button">关闭</button>
+    </div>
+    <div id="history-list" class="history-list"></div>
+    <div id="history-detail" class="history-detail">
+      <p class="history-empty">点击左侧记录即可查看本次会话中的前几次占卜详情。</p>
+    </div>
+  </aside>
+
+  <div id="loading-mask" class="loading-mask hidden">
+    <div class="loader"></div>
+    <p id="loading-text">星象正在重组，请稍候...</p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
