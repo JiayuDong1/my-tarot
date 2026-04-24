@@ -951,7 +951,7 @@ async function askAIForReading() {
 
     await typewriterOutput(readingContent, errorMessage, 16);
     drawTip.textContent = "解读请求失败，请修复服务端配置后重试。";
-    console.error("/api/tarot 调用失败", error);
+    console.error("/api/tarot 调用失败", error?.message || error);
   } finally {
     loadingMask.classList.add("hidden");
   }
@@ -975,14 +975,43 @@ function getAiFailureReason(error) {
       return "接口限流，请稍后重试";
     }
 
-    if (error.message.includes("HTTP 404")) {
-      return "接口地址错误";
-    }
-
     return error.message;
   }
 
   return "请求失败";
+}
+
+function normalizeApiError(responseData, responseText, status) {
+  const errorValue = responseData?.error;
+
+  if (typeof errorValue === "string" && errorValue.trim()) {
+    return errorValue.trim();
+  }
+
+  if (errorValue && typeof errorValue === "object") {
+    const pieces = [];
+    if (errorValue.message) {
+      pieces.push(String(errorValue.message).trim());
+    }
+    if (errorValue.upstreamStatus) {
+      pieces.push(`上游状态 ${errorValue.upstreamStatus}`);
+    }
+    if (errorValue.upstreamMessage) {
+      pieces.push(String(errorValue.upstreamMessage).trim());
+    }
+    if (errorValue.upstreamBody) {
+      pieces.push(String(errorValue.upstreamBody).trim());
+    }
+    if (pieces.length) {
+      return pieces.join(" | ");
+    }
+  }
+
+  if (responseText && responseText.trim()) {
+    return responseText.trim();
+  }
+
+  return `请求失败 (${status})`;
 }
 async function requestReadingFromServer() {
   const payload = {
@@ -1013,7 +1042,7 @@ async function requestReadingFromServer() {
   }
 
   if (!response.ok) {
-    const reason = responseData?.error || responseText || "请求失败";
+    const reason = normalizeApiError(responseData, responseText, response.status);
     throw new Error(`HTTP ${response.status}: ${reason}`);
   }
 
