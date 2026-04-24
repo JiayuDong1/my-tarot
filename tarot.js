@@ -4,9 +4,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY;
+    const apiKey = process.env.SILICONFLOW_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: "Server missing DEEPSEEK_API_KEY or OPENAI_API_KEY" });
+      return res.status(500).json({ error: "Server missing SILICONFLOW_API_KEY" });
     }
 
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
@@ -49,10 +49,9 @@ export default async function handler(req, res) {
       "请基于以上信息给出深度塔罗解读。"
     ].join("\n");
 
-    const baseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
-    const model = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+    const model = "Qwen/Qwen2.5-7B-Instruct";
 
-    const response = await fetch(`${baseUrl}/chat/completions`, {
+    const response = await fetch("https://api.siliconflow.cn/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -68,12 +67,20 @@ export default async function handler(req, res) {
       })
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ error: errText || "Upstream model request failed" });
+    const responseText = await response.text();
+    let data = null;
+    if (responseText) {
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        data = null;
+      }
     }
 
-    const data = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data?.error?.message || data?.error || responseText || "Upstream model request failed" });
+    }
+
     const text = data?.choices?.[0]?.message?.content?.trim();
     if (!text) {
       return res.status(502).json({ error: "Model returned empty content" });

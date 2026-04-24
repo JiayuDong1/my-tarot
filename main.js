@@ -1002,18 +1002,22 @@ async function requestReadingFromServer() {
     body: JSON.stringify(payload)
   });
 
-  if (!response.ok) {
-    let reason = "";
+  const responseText = await response.text();
+  let responseData = null;
+  if (responseText) {
     try {
-      const errData = await response.json();
-      reason = errData?.error || "";
+      responseData = JSON.parse(responseText);
     } catch {
-      reason = await response.text();
+      responseData = null;
     }
+  }
+
+  if (!response.ok) {
+    const reason = responseData?.error || responseText || "请求失败";
     throw new Error(`HTTP ${response.status}: ${reason}`);
   }
 
-  const data = await response.json();
+  const data = responseData || {};
   if (!data?.text) {
     throw new Error("/api/tarot 返回空结果");
   }
